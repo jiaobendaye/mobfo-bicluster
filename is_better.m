@@ -6,6 +6,10 @@ function Bool = is_better(old, new, lambda, miu, omega)
     % output:
     %     if new is better than old, return 1, else 0;
     wei = [-lambda, miu, omega]';
+    if old == new
+        Bool = 0;
+        return
+    end
     if is_domain(old,new)
         Bool = 1;
     elseif is_domain(new,old)

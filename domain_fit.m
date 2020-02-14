@@ -1,10 +1,9 @@
-function [fitness]=domain_fit(nests, scores)
+function [fitness]=domain_fit(scores)
     % input:
-    %     nests       nPop*(n+m) 0/1bits
     %     scores      nPop*3  [msr, -gv, -cv]     
     % return:
     %     fitness       nPop*1   domained_cnt :  smaller is better
-    nPop = size(nests,1);
+    nPop = size(scores,1);
     D = ones(nPop, nPop);
 
     for row=1:nPop
