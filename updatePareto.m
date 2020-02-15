@@ -8,7 +8,7 @@ function Pset_new  = updatePareto(Pset, news)
     old_size = size(Pset,1);
     %remove duplications
     tmp = unique([Pset; news], 'rows');
-    if size(tmp,1) == old_size
+    if size(tmp,1) == old_size && size(tmp,1) <= Pset_size
         Pset_new = Pset;
         return
     end

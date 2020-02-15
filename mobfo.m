@@ -30,6 +30,9 @@ for i = 1:s     % 产生初始细菌个体的位置
     P(:,i,1) = rand(p,1);
 end
 
+historyJ = zeros(Ned*Nre*Nc,3);
+history_cnt = 1;
+
 [~, best, pareto_set] = pickMinMSR(P(:,:,1));
 %------------------细菌趋药性算法循环开始---------------------
 %-----(2)驱散(迁移)操作开始-----
@@ -40,21 +43,13 @@ for l = 1:Ned
         for j = 1:Nc  
             disp(['j: ',num2str(j),' k: ',num2str(k),' l: ',num2str(l)])
             %-----(4.1)对每一个细菌分别进行以下操作-----
-
             for i = 1:s
                 %-----(4.2)计算函数J(i,j,k,l)，表示第i个细菌在第l次驱散第k次
                 %----------复制第j次趋化时的适应度值-----
                 J(i,j,:) = myCost(P(:,i,j));
                 %-----(4.4)保存细菌目前的适应度值，直到找到更好的适应度值取代之-----
                 Jlast = J(i,j,:);
-                %-----(4.5)翻转，产生一个随机向量PHI(i),代表翻转后细菌的方向-----
-                Delta(:,i) = (2*round(rand(p,1))-1).*rand(p,1);
-                % PHI表示翻转后选择的一个随机方向上前进
-                PHI = Delta(:,i)/sqrt(Delta(:,i)'*Delta(:,i));
-                % %-----(4.6)移动，向着翻转后细菌的方向移动一个步长，并且改变细菌的位置-----
-                % P(:,i,j+1) = P(:,i,j) + C(i)*PHI;
                 %levy 飞行
-                % s = P(:,i,j);
                 u=randn(size(P(:,i,j)))*sigma;
                 v=randn(size(P(:,i,j)));
                 step=u./abs(v).^(1/beta);
@@ -84,7 +79,9 @@ for l = 1:Ned
                 end
                 J(i,j,:) = Jlast; % 更新趋化操作后的适应度值
             end  % 如果i<N，进入下一个细菌的趋化，i=i+1
-            min_J = squeeze(min(J(:,j,:)))'
+            min_J = squeeze(min(J(:,j,:)))';
+            historyJ(history_cnt,:) = min_J;
+            history_cnt =history_cnt + 1;
             [~,best,~] = pickMinMSR(P(:,:,j+1));
             %-----(5)如果j<Nc，此时细菌还处于活跃状态，进行下一次趋化，j=j+1-----
         end
@@ -93,6 +90,7 @@ for l = 1:Ned
         %-----(6.1)根据所给的k和l的值，将每个细菌的适应度值按升序排序-----
         [Jhealth, ~, news] = pickMinMSR(P(:,:,Nc+1));
         pareto_set = updatePareto(pareto_set, news);
+        disp(['size of pareto set: ', num2str(size(pareto_set, 1))])
         % Jhealth = sum(J(:,:,k,l),2);  % 给每个细菌设置健康函数值
         [Jhealth,sortind] = sort(Jhealth); % 按健康函数值升序排列函数
         P(:,:,1) = P(:,sortind,Nc+1);
@@ -125,7 +123,7 @@ function cost = myCost(x)
     %output:
     %   cost        nPop*[msr, -gv, -cv]
     global data c2bTh
-    bic = conti2bit(x', c2bTh);
+    bic = conti2bit(x, c2bTh)';
     cost = calc_scores(bic, data);
 end
 function s=simplebounds(s)
