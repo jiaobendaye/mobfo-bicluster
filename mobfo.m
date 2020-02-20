@@ -3,23 +3,22 @@
 clear;
 clc;
 
-global data omega lambda miu Pset_size c2bTh Lb Ub
+global data omega lambda miu Pset_size c2bTh Lb Ub data_n
 data = choseData(1);
 lambda = 0.7;
 miu = 0.1;
 omega =0.2;
 Pset_size = 20;
-n = size(data,1);
-m = size(data,2);
+data_n = size(data,1);
+data_m = size(data,2);
 c2bTh = 0.5;
 %-----(1)初始化参数-----
-p = n+m;    % 搜索范围的维度
+p = data_n+data_m;    % 搜索范围的维度
 Ub = ones(p,1);   %上界
 Lb = zeros(p,1);  %下界
 s = 100;   % 细菌的个数
 Nc = 50;  % 趋化的次数
 Ns = 4;   % 趋化操作中单向运动的最大步数
-C(:,1) = 0.001*ones(s,1);  % 翻转选定方向后，单个细菌前进的步长
 Nre = 4;    % 复制操作步骤数
 Ned = 2;    % 驱散(迁移)操作数
 Sr = s/2;   % 每代复制（分裂）数
@@ -66,7 +65,7 @@ for l = 1:Ned
                     % 新位置的适应度值是否更好？如果更好，将新位置的适应度值
                     % 存储为细菌i目前最好的适应度值
                     % if(J(i,j+1,k,l) < Jlast)
-                    if(is_better(Jlast, J(i,j+1,:), lambda, miu, omega))
+                    if(is_better(Jlast, J(i,j+1,:)))
                         Jlast = J(i,j+1,:);  %保存更好的适应度值
                         % 在该随机方向上继续游动步长单位,修改细菌位置
                         P(:,i,j+1) =simplebounds(P(:,i,j+1) + stepsize.*randn(size(P(:,i,j+1))));
@@ -113,7 +112,7 @@ end  % 如果l<Ned，转到(2)，否则结束
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %报告
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-pareto_scores = calc_scores(pareto_set, data);
+pareto_scores = calc_scores(pareto_set);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -122,9 +121,8 @@ function cost = myCost(x)
     %   x           (n+m)*nPop
     %output:
     %   cost        nPop*[msr, -gv, -cv]
-    global data c2bTh
-    bic = conti2bit(x, c2bTh)';
-    cost = calc_scores(bic, data);
+    bic = conti2bit(x)';
+    cost = calc_scores(bic);
 end
 function s=simplebounds(s)
     global Lb Ub
@@ -146,9 +144,8 @@ function [domained_cnt, best, paretoSet] = pickMinMSR(Popu)
     %   domained_cnt    nPop*1
     %   best  min msr solution in pso-pareto set, (n＋m)*1
     %   paretoSet       size*(n+m)  0/1bits 
-    global data c2bTh
-    bics = conti2bit(Popu, c2bTh)';
-    scores = calc_scores(bics, data);
+    bics = conti2bit(Popu)';
+    scores = calc_scores(bics);
     domained_cnt  = domain_fit(scores);
 
     min_cnt =  min(domained_cnt);
@@ -160,7 +157,7 @@ function [domained_cnt, best, paretoSet] = pickMinMSR(Popu)
     [~, sortind] = sortrows(psoScores);
     best = psoPareto(:,sortind(1));
     if min_cnt == 0
-        paretoSet = conti2bit(psoPareto, c2bTh)'; 
+        paretoSet = conti2bit(psoPareto)'; 
     else
         paretoSet = [];
     end

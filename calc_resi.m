@@ -1,4 +1,4 @@
-function [resi]=calc_resi(nest,data)
+function [resi]=calc_resi(nest)
     %input:
     %   nest        nPop*(n+m)   0/1 bits        
     %
@@ -7,7 +7,7 @@ function [resi]=calc_resi(nest,data)
         nPop  = size(nest,1);
         resi = 500*ones(nPop,1);    
         for i=1:nPop
-            submatI = translation(nest(i,:),data);
+            submatI = translation(nest(i,:));
             resi(i) = residu(submatI);
         end
         

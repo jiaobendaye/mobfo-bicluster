@@ -4,7 +4,7 @@ function Pset_new  = updatePareto(Pset, news)
     %     news            N*(n+m)
     % output:
     %     Pset_new     new_size*(n+m)
-    global data Pset_size lambda miu omega
+    global Pset_size lambda miu omega
     old_size = size(Pset,1);
     %remove duplications
     tmp = unique([Pset; news], 'rows');
@@ -12,7 +12,7 @@ function Pset_new  = updatePareto(Pset, news)
         Pset_new = Pset;
         return
     end
-    scores = calc_scores(tmp, data);
+    scores = calc_scores(tmp);
     domained_cnt  = domain_fit(scores);
     pareto_set = tmp(domained_cnt == 0,:);
     if size(pareto_set,1)<=Pset_size
