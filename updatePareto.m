@@ -4,7 +4,7 @@ function Pset_new  = updatePareto(Pset, news)
     %     news            N*(n+m)
     % output:
     %     Pset_new     new_size*(n+m)
-    global Pset_size lambda miu omega
+    global Pset_size weight
     old_size = size(Pset,1);
     %remove duplications
     tmp = unique([Pset; news], 'rows');
@@ -19,7 +19,6 @@ function Pset_new  = updatePareto(Pset, news)
         Pset_new = pareto_set;
     else
         scores = abs(scores(domained_cnt == 0,:));
-        weight = [-lambda, miu, omega]';
         total = sum(scores);
         ave = 1 / size(pareto_set,1);
         percent = scores ./ total;

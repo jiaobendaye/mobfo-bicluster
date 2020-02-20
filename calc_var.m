@@ -1,4 +1,4 @@
-function [vari]=calc_var(nest,data)
+function [vari]=calc_var(nest)
     %input:
     %   nest        nPop*(n+m)   0/1 bits        
     %
@@ -7,7 +7,7 @@ function [vari]=calc_var(nest,data)
         nPop  = size(nest,1);
         vari = zeros(nPop,1);    
         for i = 1:nPop
-            bicI = translation(nest(i,:),data);
+            bicI = translation(nest(i,:));
             v = var(bicI,0,2);
             vari(i) = mean(v);
         end       
